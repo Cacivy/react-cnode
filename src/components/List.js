@@ -13,59 +13,62 @@ class List extends Component {
             isRequest: false,
             expanded: false
         };
-        this.getTopics()
+        // this.getTopics()
         // scroll Load
         window.onscroll = () => {
             var scrollHeight = getScrollHeight()
             var ScrollTop = getScrollTop()
             var WindowHeight = getWindowHeight()
             if (scrollHeight - (ScrollTop + WindowHeight) <= 50) {
-                // this.setState((prevState) => ({
-                //     page: prevState.page + 1
-                // }));
-                this.state.page++
+                this.setState((prevState) => (
+                    {page: prevState.page + 1}
+                ));
+                // this.state.page++
                 this.getTopics()
             }
         }
         EventBus.on('index', (tab) => {
-            // this.setState({
-            //     page: 1,
-            //     tab: tab
-            // })
-            this.state.page = 1
-            this.state.tab = tab
-            this.getTopics()
+            this.setState({
+                page: 1,
+                tab: tab
+            }, () => {
+                this.getTopics()
+            })
         })
+    }
+
+    componentDidMount() {
+        this.getTopics()
     }
 
     getTopics() {
         if (this.state.isRequest) {
             return
         }
-        this.state.isRequest = true
-        // this.setState((prevState) => ({
-        //     isRequest: true
-        // }))
-        fetch(`https://cnodejs.org/api/v1/topics?limit=20&page=${this.state.page || 1}&tab=${this.state.tab || ''}`).then(res => res.json()).then(res => {
+        // this.state.isRequest = true
+        this.setState({
+            isRequest: true
+        })
+        fetch(`https://cnodejs.org/api/v1/topics?limit=10&page=${this.state.page || 1}&tab=${this.state.tab || ''}`)
+        .then(res => res.json())
+        .then(res => {
             if (this.state.page === 1) {
-                this.setState((prevState) => ({
+                this.setState({
                     list: res.data,
                     isRequest: false
-                }));
+                });
             } else {
                 this.setState((prevState) => ({
                     list: prevState.list.concat(res.data),
                     isRequest: false
                 }));
             }
-            
         })
     }
 
-     handleExpandChange = (expanded) => {
+    handleExpandChange = (expanded) => {
         this.setState({expanded: expanded});
     };
-
     render() {
         return (
             <div>
@@ -80,7 +83,8 @@ class List extends Component {
                             showExpandableButton={true}
                             />
                             if (this.state.expanded) {
-                                <CardText expandable={true} dangerouslySetInnerHTML={{__html: x.content}}>
+                                <CardText expandable={true}>
+                                    <div dangerouslySetInnerHTML={{__html: x.content}}></div>
                                 </CardText>
                             }
                         </Card>

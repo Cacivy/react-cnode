@@ -14,6 +14,7 @@ class Head extends Component {
     }
 
   handleChange = (value) => {
+    // this.state.slideIndex = value
     this.setState({
       slideIndex: value
     });
