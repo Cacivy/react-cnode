@@ -15,10 +15,14 @@ class Float extends Component {
         document.body.scrollTop = 0
     }
     render() {
+        const {float} = this.props
+        if (!float) {
+            return null;
+        }
         return (
-            <FloatingActionButton secondary={true} mini={false} style={style} onClick={this.ScrollTop}>
-                <Flight />
-            </FloatingActionButton>
+                <FloatingActionButton secondary={true} mini={false} style={style} onClick={this.ScrollTop}>
+                    <Flight />
+                </FloatingActionButton>
         );
     }
 }

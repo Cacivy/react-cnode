@@ -1,33 +1,31 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import {Tabs, Tab} from 'material-ui/Tabs';
 import {EventBus} from '../utils/event-bus'
 
 class Head extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            slideIndex: 0,
-            tabs: ['全部', '精华', '分享', '问答', '招聘'],
-            tabsValue: ['', 'good', 'share', 'ask', 'job']
-        };
+    static propTypes = {
+        tab: PropTypes.object.isRequired,
+        actions: PropTypes.object.isRequired
     }
 
+
   handleChange = (value) => {
-    this.setState({
-      slideIndex: value
-    });
-    EventBus.emit('index', this.state.tabsValue[value])
+    const {tab, actions} = this.props
+    actions.updateIndex(value)
+    // 延迟，等待动画完成
+    EventBus.emit('index', tab.tabsValue[value])
   };
-    render() {
+  render() {
+      const {tab} = this.props
         return (
             <div>
                 <Tabs
                 onChange={this.handleChange}
-                value={this.state.slideIndex}
+                value={tab.slideIndex}
                 >
                 {
-                    this.state.tabs.map((x, i) => 
+                    tab.tabs.map((x, i) => 
                         <Tab key={i} label={x} value={i}/>
                     )
                 }
