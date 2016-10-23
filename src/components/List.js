@@ -1,9 +1,15 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import { getScrollTop, getWindowHeight, getScrollHeight } from '../utils/scroll.js'
 import {EventBus} from '../utils/event-bus'
 
 class List extends Component {
+
+    static propTypes = {
+        tab: PropTypes.object.isRequired,
+        actions: PropTypes.object.isRequired
+    }
+
     constructor(props) {
         super(props);
         this.state = {
@@ -13,18 +19,23 @@ class List extends Component {
             isRequest: false,
             expanded: false
         };
-        // this.getTopics()
         // scroll Load
         window.onscroll = () => {
             var scrollHeight = getScrollHeight()
             var ScrollTop = getScrollTop()
             var WindowHeight = getWindowHeight()
-            if (scrollHeight - (ScrollTop + WindowHeight) <= 50) {
+            if (scrollHeight - (ScrollTop + WindowHeight) <= 250) {
                 this.setState((prevState) => (
                     {page: prevState.page + 1}
                 ));
                 // this.state.page++
                 this.getTopics()
+            }
+            const {float, actions} = this.props
+            if (ScrollTop > WindowHeight && !float) {
+			    actions.updateFloat(true)
+            } else if (ScrollTop < WindowHeight && float) {
+                actions.updateFloat(false)
             }
         }
         EventBus.on('index', (tab) => {
@@ -49,14 +60,27 @@ class List extends Component {
         this.setState({
             isRequest: true
         })
-        fetch(`https://cnodejs.org/api/v1/topics?limit=10&page=${this.state.page || 1}&tab=${this.state.tab || ''}`)
+        let start = new Date()
+        fetch(`https://cnodejs.org/api/v1/topics?limit=15&page=${this.state.page || 1}&tab=${this.state.tab || ''}`)
         .then(res => res.json())
         .then(res => {
             if (this.state.page === 1) {
-                this.setState({
-                    list: res.data,
-                    isRequest: false
-                });
+                if (!this.state.list.length) {
+                    this.setState({
+                        list: res.data,
+                        isRequest: false
+                    });
+                } else {
+                    let end = new Date()
+                    let delay = 1007 - (end-start)/1000
+                    setTimeout(() => {
+                        this.setState({
+                            list: res.data,
+                            isRequest: false
+                        });
+                    }, delay);
+                }
+                
             } else {
                 this.setState((prevState) => ({
                     list: prevState.list.concat(res.data),
@@ -67,16 +91,27 @@ class List extends Component {
     }
 
     handleExpandChange = (expanded) => {
-        this.setState({expanded: expanded});
+        this.setState({expanded : expanded});
     };
     render() {
+        // const getTip = (top, good, tab) => {
+        //     let tip = '置顶'
+        //     if (top) {
+        //         tip = '置顶'
+        //     } else if (good) {
+        //         tip = '精华'
+        //     } else if (tab) {
+        //         tip = tab
+        //     }
+        //     return <span>tip</span>
+        // }
         return (
             <div>
                 {
                     this.state.list.map(x => 
                         <Card key={x.id} onExpandChange={this.handleExpandChange}>
                             <CardHeader
-                            title={x.title}
+                            title={<span>精华{x.title}</span>}
                             subtitle={x.author.loginname}
                             avatar={x.author.avatar_url}
                             actAsExpander={true}
