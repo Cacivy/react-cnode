@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from 'react';
 import {Card, CardHeader, CardText} from 'material-ui/Card';
 import { getScrollTop, getWindowHeight, getScrollHeight } from '../utils/scroll.js'
 import {EventBus} from '../utils/event-bus'
+import './List.css'
 
 class List extends Component {
 
@@ -94,24 +95,29 @@ class List extends Component {
         this.setState({expanded : expanded});
     };
     render() {
-        // const getTip = (top, good, tab) => {
-        //     let tip = '置顶'
-        //     if (top) {
-        //         tip = '置顶'
-        //     } else if (good) {
-        //         tip = '精华'
-        //     } else if (tab) {
-        //         tip = tab
-        //     }
-        //     return <span>tip</span>
-        // }
+        const {tab} = this.props
+        const getTip = (top, good, xtab, title) => {
+            let tip = '置顶'
+            let className = ''
+            if (top) {
+                tip = '置顶'
+                className = 'tip_top'
+            } else if (good) {
+                tip = '精华'
+                className = 'tip_top'
+            } else if (xtab) {
+                tip = tab.tabs[tab.tabsValue.indexOf(xtab)]
+                className = 'tip_default'
+            }
+            return <span><span className={className}>{tip}</span><span className="title">{' ' + title}</span></span>
+        }
         return (
             <div>
                 {
-                    this.state.list.map(x => 
-                        <Card key={x.id} onExpandChange={this.handleExpandChange}>
+                    this.state.list.map((x, i) => 
+                        <Card key={x.id} className="card" onExpandChange={this.handleExpandChange}>
                             <CardHeader
-                            title={<span>精华{x.title}</span>}
+                            title={getTip(x.top, x.good, x.tab, x.title)}
                             subtitle={x.author.loginname}
                             avatar={x.author.avatar_url}
                             actAsExpander={true}
